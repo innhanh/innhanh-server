@@ -1,0 +1,19 @@
+{
+  "name": "innhanh-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon app.js"
+  },
+  "repository": "https://github.com/innhanh/innhanh-server.git",
+  "author": "sanglak123 <sanghuynh.pt91@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "mysql2": "^2.3.3",
+    "nodemon": "^2.0.19",
+    "sequelize": "^6.21.3"
+  }
+}

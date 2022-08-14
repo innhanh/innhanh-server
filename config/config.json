@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "hsc01435_innhanh79",
+    "password": "sanglak123",
+    "database": "hsc01435_innhanh79",
+    "host": "innhanh79.vn",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
