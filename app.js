@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv").config();
 const path = require("path");
 const cors = require("cors");
+const { rootRouter } = require("./router");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -12,11 +13,14 @@ app.use("/pulic", express.static(PublicPath));
 app.use(express.json());
 app.use(cors());
 
+app.use("/api/v1", rootRouter)
+
 app.get("/", (req, res) => {
     return res.status(200).json({ mess: "Wellcome!" })
 });
 
-const {sequelize} = require("./models")
+const { sequelize } = require("./models");
+
 const CheckDatabase = async () => {
     try {
         await sequelize.authenticate();
