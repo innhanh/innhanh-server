@@ -1,14 +1,15 @@
 const multer = require("multer");
 
-const DIR = './public/image';
+const DIR = './public/images';
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, DIR);
     },
     filename: (req, file, cb) => {
+        
         const fileName = file.originalname.toLowerCase().split(' ').join('-');
-        cb(null, Date.now() + "_" + fileName)
+        cb(null, fileName)
     }
 });
 const upload = multer({

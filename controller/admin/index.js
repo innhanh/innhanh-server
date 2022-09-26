@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const dotenv = require("dotenv").config();
 const bcryptjs = require("bcryptjs");
-const { Users } = require("../../models");
+const { Users, Images } = require("../../models");
 
 const adminController = {
     Authen: {
@@ -57,7 +57,8 @@ const adminController = {
                     if (key === process.env.KEYADMIN) {
                         const salt = bcryptjs.genSaltSync(10);
                         const newPass = bcryptjs.hashSync(pass, salt);
-                        const newAdmin = await Users.create({ userName: userName, pass: newPass, email: email, tel: tel, admin: true });
+                        const avatar = "http://localhost:8000/public/avatars/user_defau.jpg";
+                        const newAdmin = await Users.create({ userName: userName, pass: newPass, email: email, tel: tel, admin: true, avatar: avatar`` });
                         return res.status(201).json({ admin: newAdmin, mess: "Đăng ký Admin thành công!" });
                     } else {
                         return res.status(403).json({ error: "Key admin không chính xác!" });
@@ -103,12 +104,46 @@ const adminController = {
     },
     Upload: {
         Carourel: async (req, res) => {
-            const url = req.protocol + '://' + req.get('host');
-            const path = url + '/public/image/' + req.file.filename
-            return res.status(200).json({ path: path, mess: "Upload thành công" })
+            const { type, name } = req.body;
+            try {
+                const url = req.protocol + '://' + req.get('host');
+                const path = url + '/public/images/' + req.file.filename;
+                const oldCarousel = await Images.findOne({
+                    where: {
+                        name: name
+                    }
+                });
+                if (oldCarousel) {
+                    return res.status(403).json({ error: "Name đã tồn tại!" })
+                } else {
+                    const newCarousel = await Images.create({
+                        type: type,
+                        name: name,
+                        url: path
+                    });
+                    return res.status(200).json({ carousel: newCarousel, mess: "Upload thành công" });
+                }
+
+            } catch (error) {
+                return res.status(500).json(error)
+            }
+
         },
         InQc: async (req, res) => {
 
+        },
+        ListImage: async (req, res) => {
+            const { type } = req.params;
+            try {
+                const list = await Images.findAll({
+                    where: {
+                        type: type
+                    }
+                });
+                return res.status(200).json({ listImage: list })
+            } catch (error) {
+                return res.status(500).json(error);
+            }
         }
     },
     Manager: {

@@ -7,9 +7,8 @@ const { rootRouter } = require("./router");
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-const PublicPath = path.join(__dirname, 'public');
 
-app.use("/pulic", express.static(PublicPath));
+app.use('/public', express.static(path.join(__dirname, 'public')))
 app.use(express.json());
 app.use(cors());
 

@@ -1,5 +1,6 @@
 const express = require("express");
 const { adminController } = require("../../controller/admin");
+const { upload } = require("../../middleware/update");
 
 const adminRouter = express.Router();
 
@@ -8,6 +9,9 @@ adminRouter.use("/login", adminController.Authen.Login);
 adminRouter.use("/logout", adminController.Authen.Logout);
 adminRouter.use("/changePass", adminController.Authen.ChangePass);
 adminRouter.use("/changeKey", adminController.Authen.ChangeKeyAdmin);
+
+adminRouter.use("/upload", upload.single('photo'), adminController.Upload.Carourel);
+adminRouter.use("/listImage/:type", adminController.Upload.ListImage);
 
 module.exports = {
     adminRouter

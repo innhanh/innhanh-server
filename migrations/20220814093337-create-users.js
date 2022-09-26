@@ -23,6 +23,9 @@ module.exports = {
       admin: {
         type: Sequelize.BOOLEAN
       },
+      avatar: {
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
