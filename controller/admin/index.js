@@ -1,7 +1,9 @@
 const { Op } = require("sequelize");
 const dotenv = require("dotenv").config();
 const bcryptjs = require("bcryptjs");
+const fs = require("fs");
 const { Users, Images } = require("../../models");
+const path = require("path");
 
 const adminController = {
     Authen: {
@@ -102,59 +104,70 @@ const adminController = {
 
         },
     },
-    Upload: {
-        Carourel: async (req, res) => {
-            const { type, name } = req.body;
-            try {
-                const url = req.protocol + '://' + req.get('host');
-                const path = url + '/public/images/' + req.file.filename;
-                const oldCarousel = await Images.findOne({
-                    where: {
-                        name: name
-                    }
-                });
-                if (oldCarousel) {
-                    return res.status(403).json({ error: "Name đã tồn tại!" })
-                } else {
-                    const newCarousel = await Images.create({
-                        type: type,
-                        name: name,
-                        url: path
-                    });
-                    return res.status(200).json({ carousel: newCarousel, mess: "Upload thành công" });
-                }
 
-            } catch (error) {
-                return res.status(500).json(error)
-            }
-
-        },
-        InQc: async (req, res) => {
-
-        },
-        ListImage: async (req, res) => {
-            const { type } = req.params;
-            try {
-                const list = await Images.findAll({
-                    where: {
-                        type: type
-                    }
-                });
-                return res.status(200).json({ listImage: list })
-            } catch (error) {
-                return res.status(500).json(error);
-            }
-        }
-    },
     Manager: {
-        ListUser: async (req, res) => {
+        Client: {
 
         },
-        UserDetail: async (req, res) => {
+        Staff: {
 
         },
-        DeleteUser: async (req, res) => {
+        Images: {
+            Upload: async (req, res) => {
+                const { type } = req.body;
+                try {
+                    const url = req.protocol + '://' + req.get('host');
+                    const pathImage = url + '/public/images/' + req.file.filename;
+                    const oldImage = await Images.findOne({
+                        where: {
+                            [Op.and]: [
+                                { type: type },
+                                { url: pathImage }
+                            ]
+                        }
+                    });
+                    if (oldImage) {
+                        return res.status(400).json({ err: "Đường dẫn đã tồn tại!" })
+                    } else {
+                        const newImage = await Images.create({ type: type, name: req.file.filename, url: pathImage });
+                        return res.status(201).json({ banner: newImage, mess: "Thêm mới thành công!" })
+                    }
+                } catch (error) {
+                    return res.status(500).json(error)
+                }
+            },
+            DeleteImage: async (req, res) => {
+                const { id } = req.params;
+                try {
+                    const image = await Images.findOne({
+                        where: {
+                            id: id
+                        }
+                    });
+                    if (image) {
+                        const unLoad = path.join(__dirname, "../../public/images/")
+                        fs.unlink(unLoad + image.name, async (err) => {
+                            if (err) {
+                                return res.status(400).json(err)
+                            } else {
+                                await Images.destroy({
+                                    where: {
+                                        id
+                                    }
+                                })
+                                return res.status(200).json({ mess: "Xóa thành công!" })
+                            }
+                        })
+                    } else {
+                        return res.status(404).json({ error: "Image not found!" })
+                    }
+                } catch (error) {
+                    return res.status(500).json(error)
+                }
+            },
+            Edit: async () => {
 
+            }
         }
     }
 };

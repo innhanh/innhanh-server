@@ -1,17 +1,15 @@
 const express = require("express");
 const { adminController } = require("../../controller/admin");
 const { upload } = require("../../middleware/update");
+const { adminAuthenRouter } = require("./authen");
+const { ManagerRouter } = require("./manager");
 
 const adminRouter = express.Router();
 
-adminRouter.use("/register", adminController.Authen.Register);
-adminRouter.use("/login", adminController.Authen.Login);
-adminRouter.use("/logout", adminController.Authen.Logout);
-adminRouter.use("/changePass", adminController.Authen.ChangePass);
-adminRouter.use("/changeKey", adminController.Authen.ChangeKeyAdmin);
+adminRouter.use("/authen", adminAuthenRouter);
 
-adminRouter.use("/upload", upload.single('photo'), adminController.Upload.Carourel);
-adminRouter.use("/listImage/:type", adminController.Upload.ListImage);
+adminRouter.use("/manager", ManagerRouter);
+
 
 module.exports = {
     adminRouter
