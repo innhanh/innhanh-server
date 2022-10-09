@@ -18,6 +18,13 @@ module.exports = {
           key: "id"
         }
       },
+      idLink: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Links",
+          key: "id"
+        }
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

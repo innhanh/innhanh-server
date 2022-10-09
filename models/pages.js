@@ -12,12 +12,14 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       this.belongsTo(models.Categorys, { foreignKey: "idCate" });
-      this.hasMany(models.Texts, { foreignKey: "idPages" })
+      this.hasMany(models.Texts, { foreignKey: "idPages" });
+      this.belongsTo(models.Links, { foreignKey: "idLink" });
     }
   }
   Pages.init({
     name: DataTypes.STRING,
-    idCate: DataTypes.INTEGER
+    idCate: DataTypes.INTEGER,
+    idLink: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Pages',

@@ -2,8 +2,9 @@ const { Op } = require("sequelize");
 const dotenv = require("dotenv").config();
 const bcryptjs = require("bcryptjs");
 const fs = require("fs");
-const { Users, Images, Categorys, Companys, Branchs } = require("../../models");
+const { Users, Images, Categorys, Companys, Branchs, Links } = require("../../models");
 const path = require("path");
+
 
 const adminController = {
     Authen: {
@@ -157,37 +158,28 @@ const adminController = {
         },
         Images: {
             Upload: async (req, res) => {
-                const { name } = req.body;
-                const { idType } = req.params;
+                const { name, type } = req.body;
                 try {
                     const baseURL = req.protocol + '://' + req.get('host');
                     const pathImage = baseURL + '/public/images/' + req.file.filename;
 
-                    const type = await TypeImages.findOne({
+                    const oldImage = await Images.findOne({
                         where: {
-                            id: idType
+                            url: pathImage
                         }
-                    })
-                    if (type) {
-                        const oldImage = await Images.findOne({
-                            where: {
-                                url: pathImage
-                            }
-                        });
-                        if (oldImage) {
-                            return res.status(400).json({ error: "Image is already exist!" });
-                        } else {
-                            const newBanner = await Images.create({
-                                name: name,
-                                idType: idType,
-                                url: pathImage,
-                                fileName: req.file.filename
-                            });
-                            return res.status(201).json({ banner: newBanner, mess: "Thêm mới thành công!" })
-                        }
+                    });
+                    if (oldImage) {
+                        return res.status(400).json({ error: "Image is already exist!" });
                     } else {
-                        return res.status(400).json({ error: "TypeImage is already exist!" })
+                        const newBanner = await Images.create({
+                            name: name,
+                            type: type,
+                            url: pathImage,
+                            fileName: req.file.filename
+                        });
+                        return res.status(201).json({ banner: newBanner, mess: "Thêm mới thành công!" })
                     }
+
 
 
                 } catch (error) {
@@ -226,22 +218,39 @@ const adminController = {
         },
         Categorys: {
             AddCate: async (req, res) => {
-                const { name, link } = req.body;
+                const { name } = req.body;
+                const { idLink } = req.params;
                 try {
-                    const oldCate = await Categorys.findOne({
+                    const link = await Links.findOne({
                         where: {
-                            [Op.and]: [
-                                { name: name },
-                                { link: link }
-                            ]
+                            id: idLink
                         }
-                    });
-                    if (oldCate) {
-                        return res.status(400).json({ error: "Danh mục đã tồn tại!" })
+                    })
+                    if (link) {
+                        const oldCate = await Categorys.findOne({
+                            where: {
+                                [Op.and]: [
+                                    { name: name },
+                                    { idLink: link.id }
+                                ]
+                            }
+                        });
+                        if (oldCate) {
+                            return res.status(400).json({ error: "Category is already exist!" });
+                        } else {
+                            const newCate = await Categorys.create({
+                                name: name,
+                                idLink: link.id
+                            });
+                            return res.status(201).json({
+                                Category: newCate,
+                                mess: "Add successfully!"
+                            })
+                        }
                     } else {
-                        const newCate = await Categorys.create({ name: name, link: link });
-                        return res.status(201).json({ newCate: newCate, mess: "Thêm mới thành công!" })
-
+                        return res.status(404).json({
+                            error: "Link is already exist!"
+                        })
                     }
                 } catch (error) {
                     return res.status(500).json(error)
@@ -292,8 +301,10 @@ const adminController = {
             },
             GetAllCate: async (req, res) => {
                 try {
-                    const list = await Categorys.findAll();
-                    return res.status(200).json({ listCate: list });
+                    const list = await Categorys.findAll({
+                        include: { model: Links }
+                    });
+                    return res.status(200).json({ ListCate: list });
                 } catch (error) {
                     return res.status(500).json(error);
                 }
@@ -301,7 +312,27 @@ const adminController = {
         },
         Links: {
             AddLink: async (req, res) => {
-
+                const { url } = req.body;
+                try {
+                    const oldLink = await Links.findOne({
+                        where: {
+                            url: url
+                        }
+                    });
+                    if (oldLink) {
+                        return res.status(400).json({ error: "Links is already exist!" });
+                    } else {
+                        const newLink = await Links.create({
+                            url: url
+                        });
+                        return res.status(201).json({
+                            Link: newLink,
+                            mess: "Add successfully!"
+                        })
+                    }
+                } catch (error) {
+                    return res.status(500).json(error);
+                }
             },
             DeleteLink: async (req, res) => {
 
@@ -344,18 +375,23 @@ const adminController = {
         Companys: {
             Add: async (req, res) => {
                 const { name, website, timeWorlk, hotline } = req.body;
-
                 try {
-                    const oldInNhanh = await Companys.findOne();
-                    if (oldInNhanh) {
+                    const baseURL = req.protocol + '://' + req.get('host');
+                    const pathImage = baseURL + '/public/images/' + req.file.filename;
+                    const oldCompany = await Companys.findOne({
+                        where: {
+                            name: name
+                        }
+                    });
+                    if (oldCompany) {
                         return res.status(400).json({ error: "Company is already exist!" })
                     } else {
                         const company = await Companys.create({
                             name: name,
-                            logo: "",
                             website: website,
                             timeWorlk: timeWorlk,
-                            hotline: hotline
+                            hotline: hotline,
+                            logo: pathImage
                         });
                         return res.status(201).json({ Company: company, mess: "Add successfully!" })
                     }
@@ -385,11 +421,11 @@ const adminController = {
                 }
             },
             Detail: async (req, res) => {
-                const { id } = req.params;
+                const { name } = req.params;
                 try {
                     const company = await Companys.findOne({
                         where: {
-                            id: id
+                            name: name
                         },
                         include: { model: Branchs }
                     });
@@ -397,6 +433,28 @@ const adminController = {
                         return res.status(200).json({ Company: company })
                     } else {
                         return res.status(404).json({ error: "Company is already exist!" })
+                    }
+                } catch (error) {
+                    return res.status(500).json(error);
+                }
+            },
+            Delete: async (req, res) => {
+                const { id } = req.params;
+                try {
+                    const company = await Companys.findOne({
+                        where: {
+                            id: id
+                        }
+                    });
+                    if (company) {
+                        await Companys.destroy({
+                            where: {
+                                id: company.id
+                            }
+                        });
+                        return res.status(200).json({ mess: "Delete success!" })
+                    } else {
+                        return res.status(404).json({ error: "Companys is already exist!" })
                     }
                 } catch (error) {
                     return res.status(500).json(error);

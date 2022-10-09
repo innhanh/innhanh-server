@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       this.hasOne(models.Carousels, { foreignKey: "idLink" });
       this.hasOne(models.Categorys, { foreignKey: "idLink" });
+      this.hasOne(models.Pages, { foreignKey: "idLink" });
     }
   }
   Links.init({

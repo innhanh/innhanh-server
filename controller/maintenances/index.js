@@ -4,10 +4,10 @@ const MaintenanceController = {
         try {
             const oldMaintenances = await Maintenances.findOne();
             if (oldMaintenances) {
-                return res.status(400).json({ error: "Maintenance đã tồn tại!" })
+                return res.status(400).json({ error: "Maintenance is already exist!" })
             } else {
                 const newMaintenances = await Maintenances.create({ on: true });
-                return res.status(201).json({ Maintenance: newMaintenances })
+                return res.status(201).json({ Maintenance: newMaintenances, mess: "Add successfully!" })
             }
         } catch (error) {
             return res.status(500).json(error);
